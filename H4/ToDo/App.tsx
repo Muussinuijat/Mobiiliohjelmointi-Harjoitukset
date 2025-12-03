@@ -1,56 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
-import React, {useState, useEffect, use } from 'react';
-import { FlatList, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React from 'react';
+import { FlatList } from 'react-native';
 import TaskItem from './components/TaskItem';
 import TaskInput from './components/TaskInput';
-
-type taskType = {
-  id: string;
-  text: string;
-  done: boolean;
-};
-
-const STORAGE_KEY = '@todoTasks';
+import { useTodos } from './hooks/useTodos';
 
 const app = () => {
-  const [tasks, setTasks] = useState<taskType[]>([]);
-  
-  useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        const storedTasks = await AsyncStorage.getItem(STORAGE_KEY);
-        if (storedTasks) {
-          setTasks(JSON.parse(storedTasks));
-        }
-      } catch (e) {
-        Alert.alert('Failed to load tasks.');
-      }
-    };
-    loadTasks();
-  }, []);
-
-  useEffect(() => {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  }, [tasks]);
-  
-  const addTask = (taskText: string) => {
-    const newTask: taskType = {
-      id: Date.now().toString(),
-      text: taskText,
-      done: false,
-    };
-    setTasks((prevTasks) => [newTask, ...prevTasks]);
-  };
-  
-  const toggleTask = (taskId: string) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, done: !task.done } : task
-      )
-    );
-  }
+  const { tasks, addTask, toggleTask } = useTodos();
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -66,8 +23,6 @@ const app = () => {
     </View>
   );
 }
-
-
 
 const styles = StyleSheet.create({
   container: {
